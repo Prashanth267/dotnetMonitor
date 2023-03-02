@@ -1,0 +1,21 @@
+{
+    "ignorePatterns": [
+        {
+            "pattern": "^https?://localhost:.*"
+        },
+        {
+            "pattern": "^https://dev\\.azure\\.com/dnceng/internal/.*"
+        },
+        {
+            "pattern": "^https://pkgs\\.dev\\.azure\\.com/dnceng/public/_packaging/.*"
+        },
+        {
+            "pattern": "^https://www\\.dotnetfoundation.org/.*"
+        }
+    ],
+    "aliveStatusCodes": [
+        0,
+        200,
+        203
+    ]
+}

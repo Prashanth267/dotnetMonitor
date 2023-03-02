@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFrameworks>$(ToolTargetFrameworks)</TargetFrameworks>
+    <RootNamespace>Microsoft.Diagnostics.Tools.Monitor</RootNamespace>
+    <ToolCommandName>dotnet-monitor</ToolCommandName>
+    <Description>.NET Core Diagnostic Monitoring Tool</Description>
+    <PackageTags>Diagnostic</PackageTags>
+    <PackageReleaseNotes>$(Description)</PackageReleaseNotes>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="$(AwsSdkS3Version)" />
+    <PackageReference Include="Azure.Identity" Version="$(AzureIdentityVersion)" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="$(AzureStorageBlobsVersion)" />
+    <PackageReference Include="Azure.Storage.Queues" Version="$(AzureStorageQueuesVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(MicrosoftAspNetCoreAuthenticationJwtBearerVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="$(MicrosoftAspNetCoreAuthenticationNegotiateVersion)" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="$(MicrosoftIdentityWebVersion)" />
+    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(MicrosoftIdentityModelTokensVersion)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="$(SwashbuckleAspNetCoreVersion)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="$(SwashbuckleAspNetCoreVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DIAGNOSTICS_REPO_ROOT)' == ''">
+    <PackageReference Include="Microsoft.Diagnostics.Monitoring" Version="$(MicrosoftDiagnosticsMonitoringLibraryVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DIAGNOSTICS_REPO_ROOT)' != ''">
+    <ProjectReference Include="$(DIAGNOSTICS_REPO_ROOT)\src\Microsoft.Diagnostics.Monitoring\Microsoft.Diagnostics.Monitoring.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Microsoft.Diagnostics.Monitoring.Options\Microsoft.Diagnostics.Monitoring.Options.csproj" />
+    <ProjectReference Include="..\..\Microsoft.Diagnostics.Monitoring.WebApi\Microsoft.Diagnostics.Monitoring.WebApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.Diagnostics.Monitoring.ConfigurationSchema" />
+    <InternalsVisibleTo Include="Microsoft.Diagnostics.Monitoring.OpenApiGen" />
+    <InternalsVisibleTo Include="CollectionRuleActions.UnitTests" />
+    <InternalsVisibleTo Include="Microsoft.Diagnostics.Monitoring.Tool.TestHostingStartup" />
+    <InternalsVisibleTo Include="Microsoft.Diagnostics.Monitoring.Tool.UnitTestCommon" />
+    <InternalsVisibleTo Include="Microsoft.Diagnostics.Monitoring.Tool.UnitTests" />
+    <InternalsVisibleTo Include="$(MoqInternalsVisibleTo)" Key="$(MoqInternalsVisibleToKey)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Update="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);GatherTfmNativeFilesInPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="GatherTfmNativeFilesInPackage">
+    <ItemGroup>
+      <!-- Pack the profiler library for each platform. -->
+      <AdditionalPackageFile Include="@(MonitorProfilerLibraryFile)">
+        <PackagePath>tools/$(TargetFramework)/any/shared/%(TargetRid)/native</PackagePath>
+      </AdditionalPackageFile>
+      <!-- Pack the profiler symbols for each platform. -->
+      <AdditionalPackageFile Include="@(MonitorProfilerSymbolsFile)">
+        <PackagePath>tools/$(TargetFramework)/any/shared/%(TargetRid)/native</PackagePath>
+      </AdditionalPackageFile>
+    </ItemGroup>
+    <ItemGroup>
+      <!-- Pack the file if it exists. -->
+      <TfmSpecificPackageFile Include="@(AdditionalPackageFile->Exists())" />
+    </ItemGroup>
+  </Target>
+
+</Project>

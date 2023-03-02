@@ -1,0 +1,45 @@
+name: 'Spellcheck'
+on:
+  pull_request:
+    paths: ['src/**', '**/*.md']
+
+permissions:
+  pull-requests: read
+
+jobs:
+  spellcheck:
+    name: Spellcheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        with:
+          persist-credentials: false
+
+      - uses: streetsidesoftware/cspell-action@faedcf94dee84afad3966c3ca108a0650b0e6c5e
+        name: Documentation spellcheck
+        if: ${{ !cancelled() }}
+        with:
+            files: '**/*.md'
+            inline: error
+            incremental_files_only: true
+
+      - uses: streetsidesoftware/cspell-action@faedcf94dee84afad3966c3ca108a0650b0e6c5e
+        name: Resx spellcheck
+        if: ${{ !cancelled() }}
+        with:
+            files: 'src/**/*.resx'
+            inline: error
+            incremental_files_only: true
+
+      - uses: streetsidesoftware/cspell-action@faedcf94dee84afad3966c3ca108a0650b0e6c5e
+        name: Source code spellcheck
+        if: ${{ !cancelled() }}
+        with:
+            files: 'src/**/*{.cs,.cpp,.h,.targets,.props,.*proj}'
+            inline: warning
+            incremental_files_only: true
+            # Do not cause the gate to fail if potential typos in source code are found.
+            # The signal-to-noise ratio here needs to be better understood first.
+            strict: false

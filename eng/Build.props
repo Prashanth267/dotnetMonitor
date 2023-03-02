@@ -1,0 +1,5 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Common.props" />
+  <Import Project="$(RepoRoot)src\archives\dotnet-monitor\ProjectsToBuild.props"
+          Condition="'$(CreateArchives)' == 'true'" />
+</Project>
